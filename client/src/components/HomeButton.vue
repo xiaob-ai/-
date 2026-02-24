@@ -19,7 +19,7 @@ const user = userStore.profile;
         </div>
       </template>
       <div class="h-auto">
-        <div v-for="item in userRouteList" @click="$router.push({name:item.name})" :key="item.name" class="cursor-pointer flex p-1 text-gray-500 items-center hover:bg-gray-100 text-center border-b ">
+        <div v-for="item in userRouteList" @click="userStore.visitPeople=user;$router.push({name:item.name})" :key="item.name" class="cursor-pointer flex p-1 text-gray-500 items-center hover:bg-gray-100 text-center border-b ">
           <el-icon size="25"  >
             <component  :is="item.meta?.icon"  ></component>
           </el-icon>

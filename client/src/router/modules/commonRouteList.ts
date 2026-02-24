@@ -11,7 +11,7 @@ export default[
     {
         path: '/follow',
         name: 'follow',
-        component:()=>import('@/modules/common/pages/Follow.vue')
+        component:()=>import('@/modules/common/pages/Follow/Follow.vue')
         ,
         meta:{
             title:'关注',

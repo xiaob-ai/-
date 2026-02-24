@@ -31,6 +31,10 @@ export class QuestionController {
     async findRecommendQuestions(@Query('offset' ,ParseIntPipe) offset: number, @Query('limit',ParseIntPipe) limit: number){
         return await this.questionService.findByRange(offset, limit)
     }
+    @Get('user')
+    async findQuestionsByUser(@Query('userId') userId: string){
+        return await this.questionService.findByAuthorId(userId)
+    }
     @Get(':id')
     async findQuestionBy(@Param('id') id: string){
         return await this.questionService.findOne(id);

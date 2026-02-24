@@ -114,9 +114,13 @@ export const useQuestionStore = defineStore(
         async function getFollowersByQuestionId(questionId: string){
             return await followService.getFollowersByQuestionId(questionId)
         }
+        async function getQuestionsByUserId(userId: string){
+            return await questionService.findQuestionsByUserId(userId)
+        }
         return {
             isLoding,
             tab,
+            getQuestionsByUserId,
             getFollowersByQuestionId,
             createQuestion,
             QuestionList,

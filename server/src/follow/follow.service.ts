@@ -134,6 +134,7 @@ export class FollowService {
             return res;
         }
     }
+    // 获取你关注的人
     async findFollowUsers(userId: string) {
         const res= await this.followUserRepository.find({
             where:{
@@ -145,4 +146,12 @@ export class FollowService {
         }
     }
 
+    // 获取关注用户者
+    async getUserFollowerByUserId(userId: string) {
+        return await this.followUserRepository.find({
+            where:{
+                followUserId:userId
+            }
+        });
+    }
 }

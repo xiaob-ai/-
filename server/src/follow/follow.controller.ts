@@ -33,5 +33,9 @@ export class FollowController {
   async getFollowQuestionsByUserId(@Query('questionId') questionId: string) {
     return await this.followService.findFollowQuestions(questionId);
   }
+  @Get('user/follower')
+  async getFollowerByUserId(@Query('userId') userId: string) {
+    return await this.followService.getUserFollowerByUserId(userId);
+  }
 
 }

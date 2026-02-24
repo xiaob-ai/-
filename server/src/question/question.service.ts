@@ -39,7 +39,10 @@ export class QuestionService {
         const questions = await this.questionRepository.find();
         return questions.filter(question => question.topicIds.includes(topicId));
     }
-
+    //根据提问者id查询问题
+    async findByAuthorId(userId: string) {
+        return await this.questionRepository.find({where: {authorId: userId}})
+    }
     //获取关注数排前十的问题
     async findFollowedQuestions(userId: string) {
         return await this.questionRepository.find({
@@ -59,9 +62,6 @@ export class QuestionService {
             }
         });
     }
-
-
-
     //获取最新十条问题
     async findLatestQuestions() {
         return await this.questionRepository.find({

@@ -13,9 +13,9 @@ export const useUserStore = defineStore(
     () => {
         /* 状态 */
         const token = ref<string>('')
-
         //个人信息
         const profile = ref<User | null>(null)
+        let visitPeople= ref<User|null>()
 
         // 关注
         const followingUser= ref<FollowUser[]>([])
@@ -121,7 +121,12 @@ export const useUserStore = defineStore(
                 await logout() // refresh 失败即视为过期
             }
         }
-
+        async function getFollowedUsersByUserId(userId: string) {
+            return await followService.getFollowedUsersByUserId(userId)
+        }
+        async function getFollowingUsersByUserId(userId: string) {
+            return await followService.getUserFollowerByUserId(userId)
+        }
         return {
             token,
             profile,
@@ -138,7 +143,7 @@ export const useUserStore = defineStore(
             cancelFollowQuestion,
             followUser,
             cancelFollowUser,
-            getFollowing,followingUser
+            getFollowing,followingUser,getFollowedUsersByUserId,getFollowingUsersByUserId,visitPeople
         }
     },
     {

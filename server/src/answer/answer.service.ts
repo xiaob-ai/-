@@ -72,5 +72,12 @@ export class AnswerService {
     async updateAnswer(id: string, answer: Answer) {
         return await this.answerRepository.update(id,answer);
     }
+    async getAnswersByUserId(userId: string) {
+        return await this.answerRepository.find({
+            where: {
+                authorId: userId
+            }
+        });
+    }
 
 }

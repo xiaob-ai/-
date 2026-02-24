@@ -32,6 +32,15 @@ export class AnswerController {
   async getAllAnswersByQuestionId(@Query('questionId') questionId:string) {
     return await this.answerService.getAnswersByQuestionId(questionId);
   }
-
+  @Public()
+  @Get('user')
+  async getAnswersByUserId(@Query('userId') userId:string) {
+    return await this.answerService.getAnswersByUserId(userId);
+  }
+  @Public()
+  @Get('one')
+  async getAnswerById(@Query('answerId') answerId:string) {
+    return await this.answerService.getAnswerById(answerId);
+  }
 
 }

@@ -60,7 +60,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import {computed, onBeforeMount, onMounted, ref} from "vue";
+import {computed, nextTick, onBeforeMount, onMounted, ref} from "vue";
 import type {Answer, User,Comment} from "@/utils/request/types.ts";
 import {useUserStore} from "@/stores/user.ts";
 import {useAnswerStore} from "@/stores/answer.ts";
@@ -68,10 +68,12 @@ import CommentItem from "@/modules/common/components/CommentItem.vue";
 import {useAppStore} from "@/stores/app.ts";
 import type {QuestionWithTopics} from "@/types";
 import {ElMessage} from "element-plus";
+import {useRouter} from "vue-router";
 
+const router = useRouter()
 const appStore = useAppStore()
 const answerStore = useAnswerStore()
-
+const viewId=router.currentRoute.value.query.answerId as string
 const isFollowing = ref(false)
 const handleFollowBtn = async function () {
   if(userStore.profile!.id===user.value!.id){
@@ -98,6 +100,16 @@ const handleFollowBtn = async function () {
 onMounted(async()=>{
   await userStore.getFollowing()
   isFollowing.value = userStore.followingUser.some(item=>item.followUserId===user.value!.id)
+  if(viewId){
+    // 锚点跳转
+    await nextTick(()=>{
+      const el = document.getElementById(viewId)
+
+      if(el){
+        el.scrollIntoView()
+      }
+    })
+  }
 })
 
 const handleShowLikeRecord = function () {

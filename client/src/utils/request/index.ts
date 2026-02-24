@@ -87,6 +87,9 @@ const questionService = {
     async findQuestionById(id: string): Promise<Question | null> {
         return await axios.get(`/question/${id}`)
     },
+    async findQuestionsByUserId(userId: string): Promise<Question[]> {
+        return await axios.get(`/question/user?userId=${userId}`)
+    },
 
 
 }
@@ -100,6 +103,12 @@ const answerService = {
     },
     async getAnswersByQuestionId(questionId: string): Promise<Answer[] | null> {
         return await axios.get(`/answer/all?questionId=${questionId}`)
+    },
+    async getAnswersByUserId(userId: string): Promise<Answer[]> {
+        return await axios.get(`/answer/user?userId=${userId}`)
+    },
+    async getAnswerById(id: string): Promise<Answer | null> {
+        return await axios.get(`/answer/one?answerId=${id}`)
     },
 }
 const likeService = {
@@ -145,6 +154,9 @@ const followService = {
     },
     async getFollowersByQuestionId(questionId: string): Promise<FollowQuestion[]> {
         return await axios.get(`/follow/question/following?questionId=${questionId}`)
+    },
+    async getFollowedUsersByUserId(userId: string): Promise<FollowUser[]> {
+        return await axios.get(`/follow/user/follower?userId=${userId}`)
     },
 
 }

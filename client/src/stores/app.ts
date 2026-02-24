@@ -13,6 +13,7 @@ export const useAppStore = defineStore(
         const loading = ref(false)             // 全局 loading 遮罩
         const msg = ref<{ type: 'success' | 'warning' | 'error' | 'info'; text: string } | null>(null)
         const showLikeAnswerId = ref<string | null>(null)
+        const isFlash = ref(false)
         /* 计算 */
         const isDark = computed(() => theme.value === 'dark')
 
@@ -60,6 +61,7 @@ export const useAppStore = defineStore(
             msg,
             isDark,
             toggleSidebar,
+            isFlash,
             setTheme,
             showLoading,
             hideLoading,

@@ -4,12 +4,13 @@ export default[
     {
         path: 'people',
         name: 'people',
-        redirect:'/user/people/dynamic',
+        redirect:'/user/people/answer',
         component:()=>import('@/modules/user/pages/People.vue'),
         children:userMainRouteList,
         meta:{
             title:'个人主页',
-            icon:'UserFilled'
+            icon:'UserFilled',
+            isShowInMenu:true
         }
     },
     {
@@ -18,7 +19,8 @@ export default[
         component:()=>import('@/modules/user/pages/Visited.vue'),
         meta:{
             title:'最近访问',
-            icon:'CollectionTag'
+            icon:'CollectionTag',
+            isShowInMenu:true
         },
     }
      ,
@@ -28,7 +30,8 @@ export default[
         component:()=>import('@/modules/user/pages/Setting.vue'),
         meta:{
             title:'设置',
-            icon:'Setting'
+            icon:'Setting',
+            isShowInMenu:true
         }
     }
 

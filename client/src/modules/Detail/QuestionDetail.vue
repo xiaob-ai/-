@@ -36,7 +36,7 @@
           </div>
           <div>
             <div v-for="item in answerList" :key="item.id">
-              <AnswerCard :question="questionWithTopics!" :answer="item"></AnswerCard>
+              <AnswerCard :id="item.id" :question="questionWithTopics!" :answer="item"></AnswerCard>
             </div>
           </div>
         </main>
@@ -49,7 +49,7 @@
 
 </template>
 <script setup lang="ts">
-import {computed, onBeforeMount,  ref} from "vue";
+import {computed, onBeforeMount, ref} from "vue";
 import {useRouter} from "vue-router";
 import type {Answer} from "@/utils/request/types.ts";
 
@@ -83,7 +83,6 @@ const handleFollowBtn = async function(){
   }
 }
 
-
 const answerStore = useAnswerStore()
 const topicStore = useTopicStore()
 const questionStore = useQuestionStore()
@@ -91,6 +90,7 @@ const questionWithTopics= ref<QuestionWithTopics|null>(null)
 const answerList = ref<Answer[]>([])
 
 const router = useRouter()
+
 onBeforeMount(async()=>{
   const question =await questionStore.getQuestionById(router.currentRoute.value.params.questionId as string)
   if(question){
@@ -110,6 +110,8 @@ onBeforeMount(async()=>{
     const res=  await answerStore.getAnswersByQuestionId(question.id)
     if(res){
       answerList.value = res
+
+
     }
     //回答按点赞排序
     answerList.value.sort((a,b)=>{
