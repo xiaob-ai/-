@@ -14,12 +14,12 @@ export default[
         }
     },
     {
-        path: 'visited',
-        name: 'visited',
-        component:()=>import('@/modules/user/pages/Visited.vue'),
+        path: 'edit',
+        name: 'edit',
+        component:()=>import('@/modules/user/pages/Edit.vue'),
         meta:{
-            title:'最近访问',
-            icon:'CollectionTag',
+            title:'编辑资料',
+            icon:'Edit',
             isShowInMenu:true
         },
     }

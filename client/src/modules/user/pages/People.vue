@@ -53,7 +53,7 @@ onBeforeMount(async()=>{
               </div>
             </div>
             <div class="h-full flex items-end">
-              <div class="rounded   h-10 border border-primary p-2 text-primary " v-if="!isOther">编辑个人资料</div>
+              <div class="rounded   h-10 border border-primary p-2 text-primary cursor-pointer hover:bg-blue-100" v-if="!isOther" @click="router.push({name:'edit'})">编辑个人资料</div>
               <follow-button v-else :userId="userStore.visitPeople!.id"/>
             </div>
           </div>
@@ -65,9 +65,24 @@ onBeforeMount(async()=>{
           <router-view :user="userStore.visitPeople"></router-view>
         </el-card>
         <aside class="flex-1">
-          <el-card class="w-full h-[200px]">
+
+          <el-card class="w-full cursor-pointer h-[100px] mt-3">
+            <div class="flex h-full p-2" >
+              <div class="flex-1 h-full !hover:text-primary border-gray-300 border-r-2" @click="router.push({name:'following'})">
+                <div class="mx-auto ">
+                  <div class="text-gray-500  text-center text-sm">关注了</div>
+                  <div class="font-bold hover:!text-primary text-center text-xl">{{userStore.visitPeople?.followingCount||0}}</div>
+                </div>
+              </div>
+              <div class="flex-1 h-full " @click="router.push({name:'followers'})">
+                <div class="mx-auto ">
+                  <div class="text-gray-500  text-center text-sm">关注者</div>
+                  <div class="font-bold hover:text-primary text-center text-xl">{{userStore.visitPeople?.followerCount||0}}</div>
+                </div>
+              </div>
+
+            </div>
           </el-card>
-          <el-card class="w-full h-[100px] mt-3"></el-card>
           <aside-footer></aside-footer>
         </aside>
       </main>
