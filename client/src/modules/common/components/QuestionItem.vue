@@ -8,7 +8,7 @@ import {useUserStore} from "@/stores/user.ts";
 import CommentItem from "@/modules/common/components/CommentItem.vue";
 const userStore = useUserStore()
 const answerStore = useAnswerStore()
-const isCollapsed = ref(false)
+// 折叠
 const isCommentShow=ref(false)
 let newCommentConten = ref('')
 const comments = ref<Comment[]>([])
@@ -57,6 +57,10 @@ onMounted(async () => {
         displayContent.value= answer.value.content.substring(0, 80)+'...'
         isCollapsed.value = true
       }
+      else {
+        displayContent.value = answer.value.content
+        isCollapsed.value = false
+      }
 
 
     }
@@ -74,6 +78,9 @@ const {question}= defineProps({
     question: Object as PropType<Question>
   })
 
+//内容展示
+const isCollapsed = ref(false)
+
 function onExtendBtnClick() {
   isCollapsed.value = false
   displayContent.value = answer.value.content
@@ -82,6 +89,9 @@ function onCollapseBtnClick() {
   isCollapsed.value = true
   displayContent.value = answer.value.content.substring(0, 80)+'...'
 }
+
+
+//点赞
 const isLike = ref({
   like: false,
   dislike: false

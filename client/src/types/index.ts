@@ -14,3 +14,5 @@ export enum CreateType{
 export interface QuestionWithTopics extends Question{
     topics: Topic[]
 }
+// 非必要信息类型
+export type UnNecessaryInfoType = 'email' | 'bio' | 'location' | 'business' | 'school' | 'major'

@@ -18,8 +18,7 @@ import RightMenu from "@/modules/common/components/Recommend/RightMenu.vue";
       <aside class="w-[var(--right-width)]">
         <Creator-Entrance></Creator-Entrance>
         <Hot-Search></Hot-Search>
-        <RecommendLike></RecommendLike>
-        <RightMenu></RightMenu>
+
       </aside>
   </div>
 

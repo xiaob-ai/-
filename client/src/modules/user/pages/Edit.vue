@@ -1,8 +1,10 @@
 <script setup lang="ts">
 //@ts-ignore
 import AvatarEdit from "@/modules/user/components/Edit/AvatarEdit.vue";
-import {ref} from "vue";
+import {nextTick, reactive, ref} from "vue";
 import {useUserStore} from "@/stores/user.ts";
+import InfoEditItem from "@/modules/user/components/Edit/InfoEditItem.vue";
+import type {UnNecessaryInfoType} from "@/types";
 
 const userStore = useUserStore();
 
@@ -13,7 +15,7 @@ function closeEditAvatar() {
   isEditAvatar.value = false;
 }
 //编辑用户信息
-const userForm=ref({
+const userForm=reactive({
   username: userStore.profile?.username,
   phone: userStore.profile?.phone,
   avatar: userStore.profile?.avatar,
@@ -24,13 +26,56 @@ const userForm=ref({
   major: userStore.profile?.major,
   email: userStore.profile?.email
 })
-
+const inputContent=ref(userForm.username)
+const isEdit=ref(false)
+const inputEl=ref<null| HTMLInputElement>(null)
+const showEdit =async () => {
+  isEdit.value = true
+  await nextTick()
+  inputEl.value?.focus()
+}
+// 非必要信息列表元素
+interface UnNecessaryMapItem {
+  label: string;
+  value: UnNecessaryInfoType;
+}
+// 非必要信息列表
+const unnecessaryInfoListMap: UnNecessaryMapItem[] = [
+  {
+    label: '邮箱',
+    value: 'email'
+  },
+  {
+    label: '一句话介绍',
+    value: 'bio'
+  },
+  {
+    label: '居住地',
+    value: 'location'
+  },
+  {
+    label: '所在公司',
+    value: 'business'
+  },
+  {
+    label: '所在学校',
+    value: 'school'
+  },
+  {
+    label: '专业',
+    value: 'major'
+  }
+]
+// 设置用户信息
+function setInfo(info: string, value: string) {
+  userForm[info as keyof typeof userForm] = value
+}
 </script>
 
 <template>
   <div class="shadow mt-2  bg-white w-[1000px] mx-auto min-h-[200px] p-2">
     <transition name="slide-down">
-      <AvatarEdit  v-if="isEditAvatar" @close="closeEditAvatar"></AvatarEdit>
+      <AvatarEdit  v-show="isEditAvatar" @close="closeEditAvatar"></AvatarEdit>
     </transition>
     <div class="flex mt-2">
 
@@ -40,17 +85,13 @@ const userForm=ref({
       </div>
       <div class="flex-1 ">
         <div class="flex w-full mb-4 justify-between">
-          <div class="text-4xl font-bold">{{userStore.profile?.username}}<span class="ml-2 text-blue-500 text-sm">修改</span></div>
+          <div class="text-4xl font-bold" v-show="!isEdit">{{userStore.profile?.username}}<span @click="showEdit" class="ml-2 text-blue-500 text-sm cursor-pointer">修改</span></div>
+          <div class="flex" v-show="isEdit" ><el-input ref="inputEl" @blur="isEdit=false" v-model="inputContent" class="w-[300px] mr-2"></el-input><el-button @click="isEdit=false" class="bg-primary text-white">修改</el-button></div>
           <div class="text-sm text-gray-500" @click="$router.push({name: 'answer'})">返回我的主页</div>
         </div>
         <div>
-          <div class=" py-4 border-b w-full flex">
-            <div class="w-60 font-bold">一句话介绍</div>
-          </div>
-          <div class=" py-4 border-b w-full flex"></div>
-          <div class=" py-4 border-b w-full flex "></div>
-          <div class=" py-4 border-b w-full flex"></div>
-          <div class=" py-4 border-b w-full flex"></div>
+          <InfoEditItem @alterInfo="setInfo" v-for="item in unnecessaryInfoListMap" :itemKey="item.value as string" :key="item.value" :label="item.label" :value="userForm[item.value] || ''"></InfoEditItem>
+
 
         </div>
       </div>

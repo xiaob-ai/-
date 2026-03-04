@@ -67,6 +67,7 @@ const scrollHandler = debounce(() => {
   const nearBottom =
       el.scrollTop + el.clientHeight >= el.scrollHeight - 40
   if (nearBottom) fetchPage()
+  console.log(el.scrollTop,el.clientHeight,el.scrollHeight)
 }, 200)
 
 onMounted(async () => {
