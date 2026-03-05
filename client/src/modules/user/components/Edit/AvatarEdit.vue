@@ -82,7 +82,7 @@
     </div>
     <div class="bg-secondary rounded p-2 text-white w-20 text-center mx-auto cursor-pointer " @click="$emit('close')">收起</div>
     <!-- 底部操作栏 -->
-    <div class="action-bar" :class="{ visible: selectedAvatar }">
+    <div class="action-bar" v-click-outside="hideBottomSheet" :class="{ visible: selectedAvatar }">
       <div class="selected-preview">
         <img :src="selectedAvatar?.url" class="preview-img" />
         <div class="preview-info">
@@ -105,11 +105,11 @@
 
 <script setup lang="ts">
 import { ref, computed} from 'vue'
-
+import type{ AvatarItem, AvatarCategory } from '@/types'
+import {vClickOutside} from "@/utils"
 // ==================== 类型定义 ====================
 
-/** 头像分类类型 */
-type AvatarCategory = 'all' | 'anime' | 'pixel' | 'abstract' | 'animal' | 'robot'
+
 
 /** 分类配置接口 */
 interface CategoryConfig {
@@ -118,14 +118,7 @@ interface CategoryConfig {
   icon: string
 }
 
-/** 头像数据接口 */
-interface AvatarItem {
-  id: string
-  name: string
-  category: Exclude<AvatarCategory, 'all'>
-  url: string
-  isFavorite: boolean
-}
+
 
 /** 组件事件定义 */
 interface Emits {
@@ -238,6 +231,13 @@ const getCategoryName = (categoryId: AvatarCategory | string | undefined): strin
   if (!categoryId) return ''
   const category = categories.find((c: CategoryConfig) => c.id === categoryId)
   return category?.name || String(categoryId)
+}
+// 隐藏下部弹框
+const hideBottomSheet = (e: Event): void => {
+    const el=e.target as HTMLElement
+    if(e&&selectedAvatar.value&&el.contains(document.querySelector('.avatar-item'))){
+      clearSelection()
+    }
 }
 
 /**

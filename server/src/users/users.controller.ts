@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import {Public} from "../auth/decorators/public.decorator";
 import {JwtPayload} from "../auth/decorators/jwtPayload.decorator";
 
+
 @Controller('users')
 export class UsersController {
     constructor(private  userService: UsersService) {}
@@ -33,7 +34,25 @@ export class UsersController {
         const res = await this.userService.findOne(id);
         return res;
     }
-
+    @Post('update')
+    async updateUser(@Body() body: any) {
+        const {id,email, username, avatar, bio, location, business, school, major} = body;
+        const user:User | null = await this.userService.findOne(id);
+        if(user){
+            user.username = username;
+            user.email = email;
+            user.avatar = avatar;
+            user.bio = bio;
+            user.location = location;
+            user.business = business;
+            user.school = school;
+            user.major = major;
+            user.updatedAt = new Date();
+        }
+        else return null;
+        const res = await this.userService.update(id, user);
+        return res;
+    }
 
 
 

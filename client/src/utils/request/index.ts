@@ -6,7 +6,7 @@ import type {
     Question,
     QuestionDto,
     Topic,
-    TopicDto,
+    TopicDto, UpdateUserDto,
     User
 } from "@/utils/request/types.ts";
 import type {Comment} from "@/utils/request/types.ts";
@@ -33,6 +33,9 @@ const userService = {
     },
     async refresh():Promise<{token: string}| null> {
         return await axios.post('/auth/refresh')
+    },
+    async updateProfile(updateData: UpdateUserDto): Promise<User | null> {
+        return await axios.post('/users/update', updateData)
     },
 }
 

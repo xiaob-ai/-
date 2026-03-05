@@ -26,6 +26,7 @@ export class UsersService {
         return await this.userRepository.findOne({where: {id}});
     }
     async update(id: string, user: User) {
+
         return await this.userRepository.update(id, user);
     }
 

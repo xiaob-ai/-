@@ -1,7 +1,13 @@
 // src/stores/user.ts
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type {CreateFollowQuestionDto, CreateFollowUserDto, FollowUser, User} from '@/utils/request/types.ts'
+import type {
+    CreateFollowQuestionDto,
+    CreateFollowUserDto,
+    FollowUser,
+    UpdateUserDto,
+    User
+} from '@/utils/request/types.ts'
 import {followService, userService} from '@/utils/request/index.ts' // 你的 axios 封装
 import router from '@/router'
 import {ElMessage} from "element-plus";
@@ -87,7 +93,18 @@ export const useUserStore = defineStore(
         async function getUserById(id: string) {
             return  await userService.getUserById(id)
         }
-
+        // 更新用户信息
+        async function updateUserInfo(userInfo: UpdateUserDto) {
+            const res = await userService.updateProfile(userInfo)
+            if(res){
+                ElMessage.success('更新用户信息成功')
+                await getUserInfo()
+            }
+            else{
+                throw new Error('更新用户信息失败')
+            }
+        }
+        // 注册
         async function register(phone: string, pwd: string, name: string) {
             const res = await userService.register(phone, pwd, name)
             if(res){
@@ -143,7 +160,7 @@ export const useUserStore = defineStore(
             cancelFollowQuestion,
             followUser,
             cancelFollowUser,
-            getFollowing,followingUser,getFollowedUsersByUserId,getFollowingUsersByUserId,visitPeople
+            getFollowing,followingUser,getFollowedUsersByUserId,getFollowingUsersByUserId,visitPeople,updateUserInfo
         }
     },
     {

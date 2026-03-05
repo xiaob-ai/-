@@ -74,3 +74,30 @@ export function debounce(fn: Function , delay:number, immediate:boolean = false)
     };
     return debounced;
 }
+
+// directives/clickOutside.ts
+import type { DirectiveBinding } from 'vue'
+
+interface ClickOutsideElement extends HTMLElement {
+    __clickOutsideHandler__: (event: MouseEvent) => void
+}
+
+export const vClickOutside = {
+    mounted(el: ClickOutsideElement, binding: DirectiveBinding) {
+        el.__clickOutsideHandler__ = (event: MouseEvent) => {
+            // 点击目标不在元素内部时触发回调
+            if (!(el === event.target || el.contains(event.target as Node))) {
+                binding.value(event)
+            }
+        }
+
+        // 延迟绑定，避免指令绑定时立即触发
+        setTimeout(() => {
+            document.addEventListener('click', el.__clickOutsideHandler__)
+        }, 0)
+    },
+
+    unmounted(el: ClickOutsideElement) {
+        document.removeEventListener('click', el.__clickOutsideHandler__)
+    }
+}

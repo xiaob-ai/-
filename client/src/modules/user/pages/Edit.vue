@@ -4,7 +4,9 @@ import AvatarEdit from "@/modules/user/components/Edit/AvatarEdit.vue";
 import {nextTick, reactive, ref} from "vue";
 import {useUserStore} from "@/stores/user.ts";
 import InfoEditItem from "@/modules/user/components/Edit/InfoEditItem.vue";
-import type {UnNecessaryInfoType} from "@/types";
+import type {UnNecessaryInfoType,AvatarItem} from "@/types";
+import {ElMessage} from "element-plus";
+import type {UpdateUserDto} from "@/utils/request/types.ts";
 
 const userStore = useUserStore();
 
@@ -16,6 +18,7 @@ function closeEditAvatar() {
 }
 //编辑用户信息
 const userForm=reactive({
+  id: userStore.profile?.id,
   username: userStore.profile?.username,
   phone: userStore.profile?.phone,
   avatar: userStore.profile?.avatar,
@@ -70,29 +73,83 @@ const unnecessaryInfoListMap: UnNecessaryMapItem[] = [
 function setInfo(info: string, value: string) {
   userForm[info as keyof typeof userForm] = value
 }
+// 设置头像
+function setAvatar(avatar: AvatarItem) {
+  userForm.avatar = avatar.url
+}
+// 校验userForm各类信息是否符合格式
+function validateInfo() {
+  if(!userForm.id){
+    return ElMessage.error('请先登录！')
+  }
+  //校验用户名
+  if(!userForm.username){
+    ElMessage.error('用户名不能为空')
+    return false
+  }
+  if (userForm.username.length < 2 || userForm.username.length > 10) {
+    ElMessage.error('用户名长度在2-10个字符之间')
+    return false
+  }
+  //校验邮箱
+  if (userForm.email && !/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(userForm.email)) {
+    ElMessage.error('邮箱格式不正确')
+  }
+  //校验学校
+  if (userForm.school && (userForm.school.length < 2 || userForm.school.length > 10)) {
+    ElMessage.error('学校长度在2-10个字符之间')
+  }
+  //校验专业
+  if (userForm.major && (userForm.major.length < 2 || userForm.major.length > 10)) {
+    ElMessage.error('专业长度在2-10个字符之间')
+  }
+  //校验头像
+  if (!userForm.avatar) {
+    ElMessage.error('请选择头像')
+  }
+  // 校验公司
+  if (userForm.business && (userForm.business.length < 2 || userForm.business.length > 10)) {
+    ElMessage.error('公司长度在2-10个字符之间')
+  }
+  // 校验居住地
+  if (userForm.location && (userForm.location.length < 2 || userForm.location.length > 10)) {
+    ElMessage.error('居住地长度在2-10个字符之间')
+  }
+  return true
+}
+// 提交用户信息
+async function submit() {
+  if (!validateInfo()) return
+  else {
+     await userStore.updateUserInfo(userForm as  UpdateUserDto)
+  }
+}
 </script>
 
 <template>
   <div class="shadow mt-2  bg-white w-[1000px] mx-auto min-h-[200px] p-2">
     <transition name="slide-down">
-      <AvatarEdit  v-show="isEditAvatar" @close="closeEditAvatar"></AvatarEdit>
+      <AvatarEdit  v-show="isEditAvatar" @close="closeEditAvatar"  @select="setAvatar"></AvatarEdit>
     </transition>
-    <div class="flex mt-2">
+    <div class="flex mt-2 pb-20">
 
       <div class="w-40 h-40 overflow-hidden relative  p-1 mr-2 rounded">
-        <img class="w-full h-full rounded" :src="userStore.profile?.avatar" alt="">
+        <img class="w-full h-full rounded" :src="userForm.avatar" alt="">
         <div class="absolute top-0 left-0 w-full h-full bg-black/20 flex justify-center items-center text-white font-bold" @click="isEditAvatar = true">修改我的头像</div>
       </div>
       <div class="flex-1 ">
         <div class="flex w-full mb-4 justify-between">
-          <div class="text-4xl font-bold" v-show="!isEdit">{{userStore.profile?.username}}<span @click="showEdit" class="ml-2 text-blue-500 text-sm cursor-pointer">修改</span></div>
-          <div class="flex" v-show="isEdit" ><el-input ref="inputEl" @blur="isEdit=false" v-model="inputContent" class="w-[300px] mr-2"></el-input><el-button @click="isEdit=false" class="bg-primary text-white">修改</el-button></div>
+          <div class="text-4xl font-bold" v-show="!isEdit">{{userForm.username}}<span @click="showEdit" class="ml-2 text-blue-500 text-sm cursor-pointer">修改</span></div>
+          <div class="flex" v-show="isEdit" ><el-input ref="inputEl" @blur="userForm.username=inputContent;isEdit=false" v-model="inputContent" class="w-[300px] mr-2"></el-input></div>
           <div class="text-sm text-gray-500" @click="$router.push({name: 'answer'})">返回我的主页</div>
         </div>
         <div>
           <InfoEditItem @alterInfo="setInfo" v-for="item in unnecessaryInfoListMap" :itemKey="item.value as string" :key="item.value" :label="item.label" :value="userForm[item.value] || ''"></InfoEditItem>
 
 
+        </div>
+        <div class="mt-4 w-1/2">
+          <el-button @click="submit" class="w-full bg-primary text-white">提交</el-button>
         </div>
       </div>
     </div>

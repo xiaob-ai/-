@@ -22,7 +22,24 @@ interface User {
     createdAt: Date
     updatedAt: Date
 }
+interface UpdateUserDto{
+    id: string;
+    username: string;
 
+    email?: string | null;
+
+    avatar: string;
+
+    bio?: string | null;
+
+    location?: string | null;
+
+    business?: string | null;
+
+    school?: string | null;
+
+    major?: string | null;
+}
 //话题
 interface Topic {
     id: string
@@ -193,7 +210,7 @@ export type {
     Comment,
     CancelLikeDto,
     CommentDto,
-
+    UpdateUserDto,
     Collection,
     CollectionItem,
     Draft,
