@@ -22,6 +22,9 @@ import { Comment } from "./comment/entity/comment.entity";
 import { FollowModule } from './follow/follow.module';
 import {FollowUser} from "./follow/entity/followUser.entity";
 import { FollowQuestion } from "./follow/entity/followQuestion.entity";
+import { ChatModule } from './chat/chat.module';
+import {Conversation} from "./chat/entities/conversation.entity";
+import {Message} from "./chat/entities/message.entity";
 @Module({
   imports: [
       ConfigModule.forRoot(
@@ -39,7 +42,7 @@ import { FollowQuestion } from "./follow/entity/followQuestion.entity";
               password: process.env.DB_PASSWORD,
               database: process.env.DB_NAME,
               synchronize: true,
-              entities: [User,Topic,Question,Answer,Like,Comment,FollowQuestion,FollowUser],
+              entities: [User,Topic,Question,Answer,Like,Comment,FollowQuestion,FollowUser,Conversation,Message],
               migrationsRun:true,
           }
       ),
@@ -50,7 +53,8 @@ import { FollowQuestion } from "./follow/entity/followQuestion.entity";
       AnswerModule,
       LikeModule,
       CommentModule,
-      FollowModule
+      FollowModule,
+      ChatModule
   ],
   controllers: [AppController],
   providers: [AppService,{
