@@ -3,7 +3,8 @@ import {IsString, IsUUID, IsNotEmpty, IsBoolean} from 'class-validator';
 export class SendMessageDto {
     @IsUUID()
     receiverId: string;
-
+    @IsUUID()
+    senderId: string;
     @IsString()
     @IsNotEmpty()
     content: string;

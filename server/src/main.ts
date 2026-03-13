@@ -5,11 +5,11 @@ import {AppInterceptor} from "./app.interceptor";
 import {AllExceptionsFilter} from "./filters/all-exceptions.filter";
 import {DatabaseExceptionFilter} from "./filters/database-exception.filter";
 import {ConflictExceptionFilter} from "./filters/conflict-exception.filter";
-import {WsAdapter} from "@nestjs/platform-ws";
+import { IoAdapter} from "@nestjs/platform-socket.io";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule,{cors: true});
-  app.useWebSocketAdapter(new WsAdapter(app));
+  app.useWebSocketAdapter(new IoAdapter(app));
   const configService = app.get(ConfigService);
   //@ts-ignore
   const port = configService.get<number>('PORT') || '3001';

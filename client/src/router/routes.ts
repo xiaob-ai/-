@@ -41,6 +41,17 @@ export default[
                 component: () => import('@/modules/Detail/QuestionDetail.vue'),
             }
         ]
+    },{
+        path: '/chat',
+        name: 'chat',
+        component:()=>import('@/layouts/DefaultLayout.vue'),
+        children: [
+            {
+                path: 'private',
+                name: 'private',
+                component: () => import('@/modules/Chat/Chat.vue'),
+            }
+        ]
     },
     {
         path: '/:pathMatch(.*)*',

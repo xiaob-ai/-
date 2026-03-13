@@ -35,11 +35,11 @@ onUnmounted(()=>{
 
 <template>
   <div class="h-screen   top-0 left-0 z-50   absolute w-full bg-black/30 " @click="closeCover" >
-    <div class="rounded bg-white mx-auto top-40 relative h-80 w-[460px]" ref="likeArea">
+    <div class="rounded  bg-white mx-auto top-40 relative overflow-y-auto h-80 w-[460px]" ref="likeArea">
       <header class="border-b p-2">
         {{likesCount||0}}人赞同了
       </header>
-      <div class="overflow-y-auto p-2">
+      <div class=" p-2">
         <div v-for="item in likesRecord" :key="item.id" class="border-b p-2">
           <LikeRecordItem :like="item"></LikeRecordItem>
         </div>

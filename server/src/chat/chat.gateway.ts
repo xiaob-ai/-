@@ -1,4 +1,11 @@
-import {ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer} from '@nestjs/websockets'
+import {
+    ConnectedSocket,
+    MessageBody,
+    OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit,
+    SubscribeMessage,
+    WebSocketGateway,
+    WebSocketServer
+} from '@nestjs/websockets'
 import {ChatService} from "./chat.service";
 import {UsersService} from "../users/users.service";
 import {Logger, UnauthorizedException} from "@nestjs/common";
@@ -6,16 +13,19 @@ import {JwtService} from "@nestjs/jwt";
 import {Server} from "socket.io";
 import {JwtPayload} from "../auth/types";
 import {User} from "../users/entity/user.entity";
-import {AuthenticatedSocket} from "../auth/types";
+import type {AuthenticatedSocket} from "../auth/types";
 import {JoinChatDto} from "./dto/join-chat.dto";
 import {SendMessageDto} from "./dto/send-message.dto";
+import {Conversation} from "./entities/conversation.entity";
+import {Message} from "./entities/message.entity";
 
-@WebSocketGateway({
+@WebSocketGateway(3001,{
     cors: {
         origin: '*'
-    }
+    },
+    transports: ['websocket'],
 })
-export class ChatGateway  {
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
     @WebSocketServer()
     server: Server;
     private readonly logger = new Logger('ChatGateway');
@@ -25,6 +35,10 @@ export class ChatGateway  {
     private sockets: Map<string, string> = new Map();
     constructor(private readonly chatService: ChatService,private readonly userService: UsersService,private readonly jwtService: JwtService) {
     }
+
+    afterInit(){
+        this.logger.log('WebSocket server initialized');
+    }
     /**
      * 用户连接上
      * @param client client
@@ -33,74 +47,75 @@ export class ChatGateway  {
     async handleConnection(client:AuthenticatedSocket, ...args: any[]) {
         const token = this.extractToken(client);
         if (!token) {
-            client.emit('error', '用户未登录');
             client.disconnect();
             this.logger.warn('用户未登录');
-            return;
+            return {
+                success: false,
+                error: '用户未登录'
+            }
         }
         const payload :JwtPayload= await this.validateToken(token);
         //获取完整用户信息
         const user:User|null =await this.userService.findOne(payload.userId);
         if (!user) {
-            client.emit('error', '用户不存在');
+
             client.disconnect();
             this.logger.warn('用户不存在');
-            return;
+             return {
+                 success: false,
+                  error: '用户不存在'
+             }
         }
-        client.user =user;
+        client.user ={id: user.id,username: user.username};
         this.logger.log(`用户 ${user.username} 已连接,socket${client.id}`);
-        await this.sendInitialData(client);
+        const data={userId:user.id};
+        this.sockets.set(user.id, client.id);
+        this.users.set(client.id, user.id);
+
+        //广播用户上线
+        this.server.emit('userOnline', data as any);
+
+        this.sendInitialData(client);
 
     }
     async handleDisconnect(client: AuthenticatedSocket) {
         const userId = this.users.get(client.id);
+        this.logger.log(`用户 ${userId} 已断开连接,socket${client.id}`);
         if (userId) {
             this.users.delete(client.id);
             this.sockets.delete(userId);
         }
-        this.logger.log(`用户 ${userId} 已断开连接,socket${client.id}`);
 
     }
     /**
      * 加入私聊会话
      */
-    @SubscribeMessage('join_chat')
+    @SubscribeMessage('joinChat')
     async handleJoinChat(
         @MessageBody() data: JoinChatDto,
         @ConnectedSocket() client: AuthenticatedSocket,
     ) {
-        const userId = this.getUserId(client);
-        const { targetUserId } = data;
 
+
+        const { targetUserId,userId } = data;
         this.logger.debug(`用户 ${userId} 尝试加入与 ${targetUserId} 的聊天`);
 
         // 验证不能和自己聊天
         if (targetUserId === userId) {
-            return {
-                success: false,
-                error: '不能与自己发起聊天',
-                code: 'SELF_CHAT',
-            };
+            client.emit('error', '不能和自己聊天');
+            return
         }
 
         // 验证目标用户存在
         const targetUser = await this.userService.findOne(targetUserId);
         if (!targetUser) {
-            return {
-                success: false,
-                error: '目标用户不存在',
-                code: 'USER_NOT_FOUND',
-            };
+            client.emit('error', '目标用户不存在');
+            return
         }
 
         // 生成房间ID
         const roomId = this.chatService.generateConversationKey(userId, targetUserId);
-
-        // 离开之前的房间（可选：限制同时只能在一个活跃聊天中）
-        // client.rooms.forEach(room => {
-        //     if (room !== client.id) client.leave(room);
-        // });
-
+        await this.chatService.createConversation(userId, targetUserId);
         // 加入新房间
         client.join(roomId);
         this.logger.debug(`用户 ${userId} 加入房间 ${roomId}`);
@@ -116,11 +131,9 @@ export class ChatGateway  {
         if (unreadMessages.length > 0) {
             await this.chatService.markAsRead(unreadMessages.map(m => m.id));
         }
-
-        // 返回成功响应
-        return {
+        const payload = {
             success: true,
-            roomId,
+            conversationId: roomId,
             targetUser: {
                 id: targetUser.id,
                 username: targetUser.username,
@@ -128,9 +141,17 @@ export class ChatGateway  {
                 isOnline: this.isUserOnline(targetUserId),
             },
             history: history, // 正序排列
-            unreadCount: 0, // 已标记为已读
         };
+        // 返回成功响应
+        client.emit('joinChat', payload);
     }
+    @SubscribeMessage('isOnline')
+    async handleIsOnline(@MessageBody() data: { userId: string }, @ConnectedSocket() client: AuthenticatedSocket){
+        const isOnline = this.isUserOnline(data.userId);
+        client.emit('isOnline', {  isOnline })
+    }
+
+
     /**
      * 发送消息
      */
@@ -139,20 +160,16 @@ export class ChatGateway  {
         @MessageBody() data: SendMessageDto,
         @ConnectedSocket() client: AuthenticatedSocket,
     ) {
-        const userId = this.getUserId(client);
-        const { content, receiverId } = data;
+
+        const { content, receiverId,senderId:userId} = data;
         if(userId === receiverId){
-            return {
-                success: false,
-                error: '不能给自己发送消息',
-                code: 'SELF_MESSAGE',
-            };
+            client.emit('error', '不能给自己发送消息');
         }
         try{
             const res= await this.chatService.sendMessage(userId, receiverId, content);
             const roomId = this.chatService.generateConversationKey(userId, receiverId);
             // 构建消息负载
-            const messagePayload = {
+            const messagePayload:Message = {
                 id: res.id,
                 senderId: res.senderId,
                 receiverId: res.receiverId,
@@ -163,29 +180,28 @@ export class ChatGateway  {
             };
             // 3. 广播到房间（双方都能收到）
             this.server.to(roomId).emit('new_message', messagePayload);
-            this.logger.debug(`消息已广播到房间 ${roomId}: ${res.id}`);
+            await this.chatService.updateLastMessageId(roomId, res.id);
             return {
                 success: true
             }
         }
         catch (error) {
             this.logger.error(error);
-            return {
-                success: false,
-                error: '发送消息失败',
-                code: 'SEND_MESSAGE_FAILED',
-            }
+            client.emit('error', '发送消息失败');
         }
+    }
 
-
+    @SubscribeMessage('refreshConversations')
+    refreshConversations(@ConnectedSocket() client: AuthenticatedSocket,@MessageBody() data: any) {
+        client.user= new User()
+        client.user.id = data.userId;
+        this.sendInitialData(client);
     }
 
     async validateToken(token: string) {
         if (!token) {
             throw new UnauthorizedException('No token provided');
         }
-        // 移除 Bearer 前缀
-        token = token.replace('Bearer ', '');
         try {
             return await this.jwtService.verifyAsync(token, {
                 secret: 'adhagsidgaiuwgqiugequweuqw9eg219usadbg9usgd7', // 或从配置读取
@@ -199,53 +215,58 @@ export class ChatGateway  {
     private extractToken(client: AuthenticatedSocket): string | null {
         // 优先从 auth 获取，其次从 query 获取
         return (
-            client.handshake.auth?.token ||
-            client.handshake.headers?.authorization || null
+            client.handshake?.auth?.token ||
+            client.handshake?.headers?.authorization || null
         );
     }
     private async sendInitialData(client: AuthenticatedSocket) {
         const userId = client.user!.id;
         // 发送会话列表
-        const conversations = await this.chatService.getConversations(userId);
-        client.emit('init_data', {
-            user: client.user,
-            conversations: conversations.map(c => ({
-                ...c,
-                otherUserOnline: this.isUserOnline(c.otherUserId),
-            })),
-            serverTime: new Date().toISOString(),
-        });
+        const conversations:Conversation[] = await this.chatService.getConversations(userId);
+
+        const  promises= conversations.map(async (conversation) => {
+            return await this.addLastMessage(conversation,userId);
+        })
+        const payload:ConversationWithMessage[] = await Promise.all(promises)
+        client.emit('init_data', payload);
     }
 
     private isUserOnline(userId: string): boolean {
-        return this.sockets.has(this.users.get(userId));
+        const  socketId= this.users.get(userId)
+        if (!socketId) return false;
+        return this.sockets.has(socketId);
+    }
+    private async addLastMessage(conversation: Conversation,userId){
+        const chatterId= conversation.user1Id === userId ? conversation.user2Id : conversation.user1Id;
+        const isChatterOnline = this.isUserOnline(chatterId);
+        const chatter = await this.userService.findOne(chatterId) as User;
+        const lastMessage = await this.chatService.getLastMessage(conversation.conversationKey);
+        const unreadCount = await this.chatService.getUnreadCount(conversation.conversationKey,userId);
+        const result:ConversationWithMessage= {
+            id: conversation.id,
+            lastMessage:lastMessage || undefined,
+            lastMessageTime: lastMessage?.createdAt,
+            online: isChatterOnline,
+            userId: chatter.id,
+            name: chatter.username,
+            avatar: chatter.avatar,
+            bio: chatter.bio || undefined,
+            unread: unreadCount,
+
+        }
+        return result;
     }
 
-    private getUserId(client: AuthenticatedSocket): string {
-        return client.user!.id;
-    }
 
-    // 广播会话更新
-    private async broadcastConversationUpdate(userId: string, otherUserId: string) {
-        const socketId = this.users.get(userId);
-        if (!socketId) return;
-
-        // 获取最新会话信息
-        const conversationKey = this.chatService.generateConversationKey(userId, otherUserId);
-        const messages = await this.chatService.getMessageHistory(userId, otherUserId);
-        const lastMessage = messages[0];
-
-        const otherUser = await this.userService.findOne(otherUserId);
-
-        this.server.to(socketId).emit('conversation_updated', {
-            conversationKey,
-            otherUser: {
-                id: otherUser!.id,
-                username: otherUser!.username,
-                avatar: otherUser!.avatar,
-                isOnline: this.isUserOnline(otherUserId),
-            },
-            updatedAt: new Date().toISOString(),
-        });
-    }
+}
+interface ConversationWithMessage {
+    id: string
+    userId: string
+    name: string
+    avatar: string
+    lastMessage?: Message
+    lastMessageTime?: Date
+    unread: number
+    online: boolean
+    bio?: string
 }

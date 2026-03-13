@@ -21,7 +21,7 @@ export const useUserStore = defineStore(
         const token = ref<string>('')
         //个人信息
         const profile = ref<User | null>(null)
-        let visitPeople= ref<User|null>()
+        let visitPeople= ref<User|null>(null)
 
         // 关注
         const followingUser= ref<FollowUser[]>([])

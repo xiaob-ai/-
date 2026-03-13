@@ -28,6 +28,11 @@ onBeforeMount(async()=>{
   }
 })
 
+function handleSendMessageBtn(){
+  const userId=userStore.visitPeople?.id;
+  router.push({name:'private',query:{id:userId}})
+}
+
 </script>
 
 <template>
@@ -54,7 +59,10 @@ onBeforeMount(async()=>{
             </div>
             <div class="h-full flex items-end">
               <div class="rounded   h-10 border border-primary p-2 text-primary cursor-pointer hover:bg-blue-100" v-if="!isOther" @click="router.push({name:'edit'})">编辑个人资料</div>
-              <follow-button v-else :userId="userStore.visitPeople!.id"/>
+              <div v-else class="flex">
+                <follow-button v-if="userStore.visitPeople?.id" :userId="userStore.visitPeople.id"/>
+                <el-button class="h-10 p-2 ml-2 " @click="handleSendMessageBtn">发私信</el-button>
+              </div>
             </div>
           </div>
         </div>
