@@ -10,6 +10,7 @@ import type {
     User
 } from "@/utils/request/types.ts";
 import type {Comment} from "@/utils/request/types.ts";
+import type {Message} from "@/utils/request/chat/types.ts";
 const userService = {
     async register(phone: string, password: string, name: string) :Promise<User | null> {
         return await axios.put('/users/register', {
@@ -141,18 +142,18 @@ const commentService = {
 }
 const followService = {
     async followUser(createFollowUserDto: CreateFollowUserDto): Promise<any | null> {
-        return await axios.put('/follow/followUser', {dto:createFollowUserDto})
+        return await axios.put('/follow/followUser', {dto: createFollowUserDto})
     },
-    async cancelFollowUser( createFollowUserDto: CreateFollowUserDto): Promise<any | null> {
-        return await axios.delete('/follow/cancelFollowUser', {data: {dto:createFollowUserDto}})
+    async cancelFollowUser(createFollowUserDto: CreateFollowUserDto): Promise<any | null> {
+        return await axios.delete('/follow/cancelFollowUser', {data: {dto: createFollowUserDto}})
     },
     async followQuestion(createFollowQuestionDto: CreateFollowQuestionDto): Promise<any | null> {
-        return await axios.put('/follow/followQuestion', {dto:createFollowQuestionDto})
+        return await axios.put('/follow/followQuestion', {dto: createFollowQuestionDto})
     },
     async cancelFollowQuestion(createFollowQuestionDto: CreateFollowQuestionDto): Promise<any | null> {
-        return await axios.delete('/follow/cancelFollowQuestion', {data: {dto:createFollowQuestionDto}})
+        return await axios.delete('/follow/cancelFollowQuestion', {data: {dto: createFollowQuestionDto}})
     },
-    async getUserFollowerByUserId(userId: string): Promise<FollowUser[] > {
+    async getUserFollowerByUserId(userId: string): Promise<FollowUser[]> {
         return await axios.get(`/follow/user/following?userId=${userId}`)
     },
     async getFollowersByQuestionId(questionId: string): Promise<FollowQuestion[]> {
@@ -161,6 +162,10 @@ const followService = {
     async getFollowedUsersByUserId(userId: string): Promise<FollowUser[]> {
         return await axios.get(`/follow/user/follower?userId=${userId}`)
     },
-
 }
-export {userService,topicService,questionService,answerService,likeService,commentService,followService}
+const messageService = {
+        async getUnreadMessages(userId: string): Promise<Message[]> {
+            return await axios.get(`/chat/unread?userId=${userId}`)
+        }
+}
+export {userService,topicService,questionService,answerService,likeService,commentService,followService,messageService}

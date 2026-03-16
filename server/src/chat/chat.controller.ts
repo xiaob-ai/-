@@ -8,5 +8,10 @@ import { AuthGuard } from '../auth/auth.guard';
 export class ChatController {
     constructor(private chatService: ChatService) {}
 
+    @Get('unread')
+    async getUnreadInfo(@Query('userId') userId: string) {
+        return await this.chatService.getUnreadMessages(userId);
+    }
+
 
 }

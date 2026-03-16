@@ -14,7 +14,7 @@ import {Bell} from "@element-plus/icons-vue";
         </div>
       </template>
       <div class="h-96">
-
+        <h1 class="border-b text-center w-full pb-2">我的消息</h1>
       </div>
     </el-popover>
   </div>

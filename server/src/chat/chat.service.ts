@@ -57,6 +57,20 @@ export class ChatService {
     }
 
 
+    // 获取全部未读消息
+    async getUnreadMessages(userId: string) {
+        return await this.messageRepository.find({
+            where: {
+                receiverId: userId,
+                isRead: false
+            }
+            ,order: {
+                createdAt: 'DESC',
+            }
+        })
+    }
+
+
     // 根据消息ID批量更新已读状态
     async markAsRead(strings: string[]) {
         await this.messageRepository.update(strings, {

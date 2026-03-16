@@ -25,6 +25,7 @@ import { FollowQuestion } from "./follow/entity/followQuestion.entity";
 import { ChatModule } from './chat/chat.module';
 import {Conversation} from "./chat/entities/conversation.entity";
 import {Message} from "./chat/entities/message.entity";
+
 @Module({
   imports: [
       ConfigModule.forRoot(
@@ -54,7 +55,7 @@ import {Message} from "./chat/entities/message.entity";
       LikeModule,
       CommentModule,
       FollowModule,
-      ChatModule
+      ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService,{

@@ -25,7 +25,7 @@ defineProps<Props>()
   <div class="ml-3 flex-1 min-w-0">
     <div class="flex items-center justify-between mb-0.5">
       <span class="text-[15px] font-medium text-[#121212] truncate">{{ chat.name }}</span>
-      <span class="text-xs text-[#8590a6] whitespace-nowrap">{{ chat.lastMessageTime && new Date(chat.lastMessageTime!).toLocaleTimeString() }}</span>
+      <span class="text-xs text-[#8590a6] whitespace-nowrap">{{ chat.lastMessageTime && new Date(chat.lastMessageTime!).toLocaleString() }}</span>
     </div>
     <p class="text-sm text-[#8590a6] truncate">{{ chat.lastMessage?.content }}</p>
   </div>
