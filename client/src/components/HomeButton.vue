@@ -14,14 +14,14 @@ const user = userStore.profile;
       <template #reference>
         <div>
           <div class="rounded-full  bg-primary hover:cursor-pointer" >
-            <img :src="user?.avatar || defaultAvatar" alt="avatar" class="w-10 h-10 rounded-full">
+            <img :src="user?.avatar || defaultAvatar" loading="lazy" alt="avatar" class="w-10 h-10 rounded-full">
           </div>
         </div>
       </template>
       <div class="h-auto">
         <div v-for="item in userRouteList" @click="userStore.visitPeople=user;$router.push({name:item.name})" :key="item.name" class="cursor-pointer flex p-1 text-gray-500 items-center hover:bg-gray-100 text-center border-b ">
           <el-icon size="25"  >
-            <component  :is="item.meta?.icon"  ></component>
+            <component :is="item.meta?.icon"  ></component>
           </el-icon>
           <div class="text=[20px] ml-2">{{item.meta?.title}}</div>
         </div>

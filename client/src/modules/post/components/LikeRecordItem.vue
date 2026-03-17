@@ -43,7 +43,7 @@ const isFollowing = ref(false)
 <div class="flex items-center pb-2  justify-between">
   <div class="flex h-full cursor-pointer" @click="$router.push({name:'people',query:{id:userInfo?.id}});">
     <div class="rounded mr-2 h-full">
-      <img class="w-12 h-12" :src="userInfo?.avatar">
+      <img loading="lazy" class="w-12 h-12" :src="userInfo?.avatar">
     </div>
     <div>
       <div class="text-2xl font-bold">{{userInfo?.username}}</div>

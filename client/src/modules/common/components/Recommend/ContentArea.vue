@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import {ref, onMounted, onBeforeUnmount} from 'vue'
 
 import { debounce } from '@/utils/index.ts'   // 上一条回答里的防抖函数
 import {useQuestionStore} from "@/stores/qusetion.ts";
@@ -37,7 +37,6 @@ async function fetchPage() {
   if (loading.value|| finished.value) return
   loading.value = true
 
-    // 这里换成你的真实接口；下面用 mocky 做演示
     const res= await questionStore.getRecommendQuestions(offset.value, limit.value)
 
     if (res && res.length>0) {
@@ -73,5 +72,8 @@ const scrollHandler = debounce(() => {
 onMounted(async () => {
   await fetchPage() // 首屏
   rootRef.value?.addEventListener('scroll', scrollHandler)
+})
+onBeforeUnmount(() => {
+  rootRef.value?.removeEventListener('scroll', scrollHandler)
 })
 </script>

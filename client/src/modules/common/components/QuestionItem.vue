@@ -1,17 +1,18 @@
 <script setup lang="ts">
-
 import { onMounted, type PropType, ref} from "vue";
 import type {Answer, Question,Comment} from "@/utils/request/types.ts";
 import {useAnswerStore} from "@/stores/answer.ts";
-
 import {useUserStore} from "@/stores/user.ts";
 import CommentItem from "@/modules/common/components/CommentItem.vue";
 const userStore = useUserStore()
 const answerStore = useAnswerStore()
+
 // 折叠
 const isCommentShow=ref(false)
 let newCommentConten = ref('')
 const comments = ref<Comment[]>([])
+
+// 提交评论
 const onSubmitComment = async () => {
   if(newCommentConten.value.length<1){
     return
@@ -25,7 +26,7 @@ const onSubmitComment = async () => {
   newCommentConten.value = ''
   comments.value = await answerStore.getCommentsByAnswerId(answer.value.id)
 }
-let answer =ref<Answer>({
+const answer =ref<Answer>({
   id: '',
   questionId: '',
   authorId: '',
@@ -39,27 +40,28 @@ let answer =ref<Answer>({
   status: 'normal',
   questionTitle: ''
 })
-
+// 预览内容
 const displayContent = ref('')
 onMounted(async () => {
 
   if(question!.id) {
+    // 获取最佳答案
     const bestAnswer = await answerStore.getBestAnswer(question!.id)
     if(bestAnswer) {
-
+      // 判断用户是否点赞
       const isUserLikeRes = await answerStore.isUserLike(userStore.profile!.id,bestAnswer.id)
       if(isUserLikeRes) {
         isLike.value= isUserLikeRes
       }
-
       answer.value = bestAnswer
+      // 判断内容是否折叠
       if(answer.value.content.length>40){
         displayContent.value= answer.value.content.substring(0, 80)+'...'
         isCollapsed.value = true
       }
       else {
         displayContent.value = answer.value.content
-        isCollapsed.value = false
+        isOverflow.value = false
       }
 
 
@@ -68,7 +70,6 @@ onMounted(async () => {
   }
   if(answer.value){
     comments.value = await answerStore.getCommentsByAnswerId(answer.value.id)
-
   }
 
 
@@ -79,8 +80,8 @@ const {question}= defineProps({
   })
 
 //内容展示
-const isCollapsed = ref(false)
-
+const isCollapsed = ref(false) // 内容是否折叠
+const isOverflow = ref(false) // 内容是否溢出
 function onExtendBtnClick() {
   isCollapsed.value = false
   displayContent.value = answer.value.content
@@ -167,8 +168,8 @@ async function dislike() {
         <header class="font-bold cursor-pointer text-lg hover:text-primary border-b pb-1">{{question?.title}}</header>
       </router-link>
     <div  class=" mt-2 w-full h-1/3 hover:text-gray-500 " style="font-size: 15px">
-      <span class="content-container">{{displayContent}}</span><span v-if="isCollapsed" class="cursor-pointer text-primary" @click="onExtendBtnClick">展开</span>
-      <span v-else class="cursor-pointer text-primary" @click="onCollapseBtnClick">收起</span>
+      <span class="content-container">{{displayContent}}</span><span v-if="isOverflow" v-show="isCollapsed" class="cursor-pointer text-primary" @click="onExtendBtnClick">展开</span>
+      <span v-show="!isCollapsed" v-if="isOverflow" class="cursor-pointer text-primary" @click="onCollapseBtnClick">收起</span>
     </div>
     <footer class="flex h-auto mx-2 mt-2 items-center">
       <div class="bg-blue-300 p-1 rounded  cursor-pointer  'text-white'" :class="{ ' bg-primary':isLike.like}" @click="like" ><el-icon color="white"><ArrowUpBold /></el-icon> 赞同 {{answer.voteUp}}</div>

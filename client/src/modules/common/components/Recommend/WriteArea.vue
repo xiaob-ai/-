@@ -4,6 +4,9 @@ import {CommentPermission} from "@/types";
 import {useTopicStore} from "@/stores/topic";
 import {ElMessage} from "element-plus";
 import PostRouteList from "@/router/modules/postRouteList.ts";
+import {useUserStore} from "@/stores/user.ts";
+
+const userStore = useUserStore()
 const topicStore = useTopicStore()
 
 const topicform = reactive<{name:string,description:string}>({name:'',description:''})
@@ -46,7 +49,7 @@ function submitHandeler() {
     <div class="flex border-b p-2">
       <div class="w-auto mr-2">
         <div class="bg-primary rounded w-8 h-8">
-          <img src="../../../../assets/vue.svg">
+          <img :src="userStore.profile!.avatar" loading="lazy" >
         </div>
       </div>
       <div class="flex-1 ">

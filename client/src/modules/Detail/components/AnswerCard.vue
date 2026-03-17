@@ -4,7 +4,7 @@
       <div class="flex p-2  justify-between items-center" >
         <div class="flex items-center" @click="$router.push({name:'people',query:{id:user?.id}})">
           <div class="w-10 h-10 rounded-full overflow-hidden">
-            <img :src="user?.avatar || userStore.defaultAvartar" alt="">
+            <img loading="lazy" :src="user?.avatar || userStore.defaultAvartar" alt="">
           </div>
           <div class="ml-2">
             <div class="text-xl">{{user?.username}}</div>

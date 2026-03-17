@@ -295,7 +295,6 @@ const handleImageError = (event: Event): void => {
 const emit = defineEmits<Emits>()
 
 defineExpose<AvatarSelectorExpose>({
-  selectedAvatar,
   clearSelection,
   getSelectedAvatar: (): AvatarItem | null => selectedAvatar.value,
   resetFilters
